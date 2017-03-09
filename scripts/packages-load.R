@@ -2,13 +2,41 @@ library('ndtv')
 library('network')
 
 # Custom Functions
-
-open.rdata<-function(x){local(get(load(x)))}
-
-dividelast<-function(column){
-  #column<-wiot.df.ci[,1]
-  vector<-column[1:length(column)-1]
-  scalar<-column[length(column)]
-  output<-vector/scalar
-  output<-as.data.frame(output)
-}
+  # Open Rdata as dataframe
+    open.rdata<-function(x){local(get(load(x)))}
+    
+  # Divide a column by its last value  
+    dividelast<-function(column){
+      #column<-wiot.df.ci[,1]
+      vector<-column[1:length(column)-1]
+      scalar<-column[length(column)]
+      .<-vector/scalar
+      .<-as.data.frame(.)
+    }
+  
+  # CI matrix only
+    ci.matrix<-function(df){
+    wiot.df<-as.data.frame(df)
+    #wiot.colnames<-as.data.frame(colnames(wiot.df))
+    # CI data goes until line 2464= 44 countries * 56 sectors
+    wiot.df.ci<-wiot.df[1:2464,6:2469]
+    # Columns 6:2469 have the CI data
+    # Columns 57-61 for each country goes from colums 2470:2689
+    # CONS_h,	CONS_np,	CONS_g,	GFCF,	INVEN,	EXP	GO
+    # Final consumption expenditure by households	Final consumption expenditure by non-profit organisations serving households (NPISH)	Final consumption expenditure by government	Gross fixed capital formation	Changes in inventories and valuables	Exports	Total output
+    # Colum 2690 has the total production, which is the same value as in line 2472 (GO)
+    # View(wiot.df[1,2690])
+    # View(wiot.df[2472,6])
+    }
+  
+  # CI matrix of technical coefficients
+    cit.matrix<-function(df){
+    wiot.df<-as.data.frame(df)
+    # CI data goes until line 2464= 44 countries * 56 sectors
+    # Line 2472 (GO) has the Output at basic prices
+    wiot.df.ci<-wiot.df[c(1:2464, 2472),6:2469]
+    wiot.df.cin<-sapply(wiot.df.ci, dividelast)
+    wiot.df.cin<-as.data.frame(wiot.df.cin)
+    }
+    
+    
