@@ -10,7 +10,7 @@ library('network')
       #column<-wiot.df.ci[,1]
       vector<-column[1:length(column)-1]
       scalar<-column[length(column)]
-      .<-vector/scalar
+      ifelse(scalar==0, .<-vector/1, .<-vector/scalar)
       .<-as.data.frame(.)
     }
   
@@ -39,4 +39,9 @@ library('network')
     wiot.df.cin<-as.data.frame(wiot.df.cin)
     }
     
-    
+  # Zero to values less than 0.000001
+    zerosmall<-function(column){
+      ifelse(column<0.0000001, .<-0, .<-column)
+      .<-as.data.frame(.)
+      .<-.*100
+    }
