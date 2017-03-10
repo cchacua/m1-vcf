@@ -1,7 +1,18 @@
 library('ndtv')
 library('network')
+library('reshape2')
 
 # Custom Functions
+  # Substract right
+    substrRight <- function(x, n){
+    substr(x, nchar(x)-n+1, nchar(x))
+    }
+  
+  # Remove last n characters from a string    
+    remRight <- function(x, n){
+    substr(x, 1, nchar(x)-n)
+    }
+    
   # Open Rdata as dataframe
     open.rdata<-function(x){local(get(load(x)))}
     
@@ -13,7 +24,24 @@ library('network')
       ifelse(scalar==0, .<-vector/1, .<-vector/scalar)
       .<-as.data.frame(.)
     }
+    
+  # Zero to values less than 0.000001
+    zerosmall<-function(column){
+      ifelse(column<0.0000001, .<-0, .<-column)
+      .<-as.data.frame(.)
+      .<-.*100
+    }
   
+  # Divide a column by its last value and put zero to values less than 0.000001
+    dividelastsmall<-function(column){
+      #column<-wiot.df.ci[,1]
+      vector<-column[1:length(column)-1]
+      scalar<-column[length(column)]
+      ifelse(scalar==0, .<-vector/1, .<-vector/scalar)
+      ifelse(.<0.0000001, .<-0, .<-.)
+      .<-as.data.frame(.)
+      .<-.*100
+    }
   # CI matrix only
     ci.matrix<-function(df){
     wiot.df<-as.data.frame(df)
@@ -39,9 +67,3 @@ library('network')
     wiot.df.cin<-as.data.frame(wiot.df.cin)
     }
     
-  # Zero to values less than 0.000001
-    zerosmall<-function(column){
-      ifelse(column<0.0000001, .<-0, .<-column)
-      .<-as.data.frame(.)
-      .<-.*100
-    }

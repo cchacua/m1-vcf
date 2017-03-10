@@ -8,6 +8,8 @@ install.packages("data.table")
 install.packages("RColorBrewer")
 install.packages('network')
 install.packages('ndtv', dependencies=T)
+install.packages("reshape2")
 # http://curleylab.psych.columbia.edu/netviz/netviz1.html#/51
 # http://kateto.net/network-visualization
 # http://www.kateto.net/polnet2015
+# https://www.r-bloggers.com/reshape-and-aggregate-data-with-the-r-package-reshape2/
