@@ -18,17 +18,20 @@ wiot.cit.matrix<-open.rdata("../outputs/wiot.cit.matrix.RData")
 ci.2000<-as.data.frame(wiot[1])
 ci.2000<-ci.matrix(ci.2000)
 
-cit.2000<-as.data.frame(wiot[1])
-cit.2000<-cit.matrix(cit.2000)
-wiot.df.cin<-cit.2000
+wiot.df<-as.data.frame(wiot[1])
+wiot.df.cin<-cit.matrix(wiot.df)
 cit.names<-colnames(wiot.df.cin)
 cit.names<-remRight(cit.names,2)
 rownames(wiot.df.cin)<-cit.names
 colnames(wiot.df.cin)<-cit.names
 wiot.df.cin$id<-rownames(wiot.df.cin)
 cit.mlist<-melt(wiot.df.cin, id = "id")
-cit.mlist$value<-ifelse(cit.mlist$value<=0.000001, NA, cit.mlist$value*100)
+#cit.mlist$value<-ifelse(cit.mlist$value<=0.000001, NA, cit.mlist$value*100)
+cit.mlist$value<-ifelse(cit.mlist$value==0, NA, cit.mlist$value*100)
 cit.mlist<-na.omit(cit.mlist)
+cit.nodes<-cbind(cit.names, wiot.df[1:2464,1:5])
+cit.net<-network(cit.mlist[1:100,], vertex.attr=cit.nodes, matrix.type="edgelist", loops=T, multiple=F, ignore.eval = T)
+plot(cit.net)
 summary(cit.mlist[,3])
 
 
