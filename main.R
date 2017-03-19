@@ -16,13 +16,21 @@ source("./scripts/packages-load.R")
 wiot<-open.rdata("../outputs/wiot.RData")
 
 # igraph
-wiot.df<-as.data.frame(wiot[1])
+wiot.df<-as.data.frame(wiot[15])
 wiot.df.cin<-cit.matrix(wiot.df)
 cit.names<-colnames(wiot.df.cin)
 cit.names<-unique(cit.names)
 cit.names<-remRight(cit.names,2)
 #rownames(wiot.df.cin)<-cit.names
 colnames(wiot.df.cin)<-cit.names
+  # Extract column of FRA20
+  fr20.col<-wiot.df.cin[,"FRA20"]
+  fr20.col<-as.data.frame(fr20.col)
+  rownames(fr20.col)<-cit.names
+  fr20.col[,1]<-ifelse(fr20.col[,1]==0, NA, fr20.col[,1])
+  fr20.col<-na.omit(fr20.col)
+  # The French transportation sector had relationships with 2.192 of 2.464 industries in the whole dataset
+  
 cit.imatrix<-as.matrix(wiot.df.cin)
 cit.net<-graph_from_adjacency_matrix(cit.imatrix, mode="directed",  weighted = TRUE, diag = TRUE)
 # To get the number of nodes and edges
@@ -33,12 +41,21 @@ gsize(cit.net)
 cit.net.trans.list<-subcomponent(cit.net, "FRA20", mode ="all")
 cit.net.trans<-induced_subgraph(cit.net, cit.net.trans.list)
 # To get the number of nodes
-gorder(cit.net.trans)
-gsize(cit.net.trans)
+print("Number of nodes")
+print(gorder(cit.net.trans))
+print("Number of Edges")
+print(gsize(cit.net.trans))
   # # To verify there is only a connected component
   # cit.net.trans.clus<-components(cit.net.trans, mode ="weak")
   # cit.net.trans.clus.mem<-as.data.frame(cit.net.trans.clus[1])
   # summary(cit.net.trans.clus.mem[,1])
+# Get neighbor edges
+#?incident
+fr20.neighbors.e<-incident(cit.net.trans, "FRA20", mode="in")
+# Get neighbor nodes
+fr20.neighbors.v<-neighbors(cit.net.trans, "FRA20", mode="in")
+
+
 
 
 trans.clus <- cluster_walktrap(cit.net.trans)
@@ -83,5 +100,8 @@ sapply(cit.net.dec, diameter)
   
 # Network with in terms of technical coefficients
 
-  
+# Extract production of the transportation sector
+production.fr20<-sapply(wiot, prod.fr20)
+production.fr20<-as.data.frame(t(production.fr20))
+
   

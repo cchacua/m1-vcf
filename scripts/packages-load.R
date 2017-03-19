@@ -71,3 +71,9 @@ library('visNetwork')
     wiot.df.cin<-as.data.frame(wiot.df.cin)
     }
     
+  # Extract production of each year for the transportation sector
+    prod.fr20<-function(df){
+      wiot.df<-as.data.frame(df)
+      value<-wiot.df[2472, c("FRA20", "Year")]
+    }
+    
