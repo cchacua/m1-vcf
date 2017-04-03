@@ -13,35 +13,23 @@ options(stringsAsFactors=FALSE)
 source("./scripts/packages-load.R")
 # Create output files from the original data (Run once)
 # source("./scripts/load-once.R")
+source("./scripts/functions.R")
+
+
+# Load data
 wiot<-open.rdata("../outputs/wiot.RData")
 
-# igraph
+
 wiot.df<-as.data.frame(wiot[15])
-wiot.df.cin<-cit.matrix(wiot.df)
-cit.names<-colnames(wiot.df.cin)
-cit.names<-unique(cit.names)
-cit.names<-remRight(cit.names,2)
-#rownames(wiot.df.cin)<-cit.names
-colnames(wiot.df.cin)<-cit.names
 
-cit.imatrix<-as.matrix(wiot.df.cin)
-cit.net<-graph_from_adjacency_matrix(cit.imatrix, mode="directed",  weighted = TRUE, diag = TRUE)
-# To get the number of nodes and edges
-gorder(cit.net)
-gsize(cit.net)
+wiot.net15.f<-networks(wiot.df,mode="flows")
+wiot.net15.tc<-networks(wiot.df,mode="techcoef")
 
-#Only the transportation sector network
-cit.net.trans.list<-subcomponent(cit.net, "FRA20", mode ="all")
-cit.net.trans<-induced_subgraph(cit.net, cit.net.trans.list)
-# To get the number of nodes
-print("Number of nodes")
-print(gorder(cit.net.trans))
-print("Number of Edges")
-print(gsize(cit.net.trans))
-  # # To verify there is only a connected component
-  # cit.net.trans.clus<-components(cit.net.trans, mode ="weak")
-  # cit.net.trans.clus.mem<-as.data.frame(cit.net.trans.clus[1])
-  # summary(cit.net.trans.clus.mem[,1])
+deg.dist<-degree_distribution(wiot.net15.f, cumulative=T, mode="all")
+plot(x=0:max(deg), y=1-deg.dist, pch=19, cex=1.2, col="orange",
+      xlab="Degree", ylab="Cumulative Frequency")
+
+
 # Get neighbor edges
 #?incident
 fr20.neighbors.e<-incident(cit.net.trans, "FRA20", mode="in")
