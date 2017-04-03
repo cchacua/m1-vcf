@@ -23,14 +23,7 @@ cit.names<-unique(cit.names)
 cit.names<-remRight(cit.names,2)
 #rownames(wiot.df.cin)<-cit.names
 colnames(wiot.df.cin)<-cit.names
-  # Extract column of FRA20
-  fr20.col<-wiot.df.cin[,"FRA20"]
-  fr20.col<-as.data.frame(fr20.col)
-  rownames(fr20.col)<-cit.names
-  fr20.col[,1]<-ifelse(fr20.col[,1]==0, NA, fr20.col[,1])
-  fr20.col<-na.omit(fr20.col)
-  # The French transportation sector had relationships with 2.192 of 2.464 industries in the whole dataset
-  
+
 cit.imatrix<-as.matrix(wiot.df.cin)
 cit.net<-graph_from_adjacency_matrix(cit.imatrix, mode="directed",  weighted = TRUE, diag = TRUE)
 # To get the number of nodes and edges
@@ -104,4 +97,6 @@ sapply(cit.net.dec, diameter)
 production.fr20<-sapply(wiot, prod.fr20)
 production.fr20<-as.data.frame(t(production.fr20))
 
-  
+
+# List of countries WIOT
+length(unique(wiot.df$Country))

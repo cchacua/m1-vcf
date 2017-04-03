@@ -71,3 +71,15 @@ cit.nodes<-cbind(cit.names, wiot.df[1:2464,1:5])
 # comp.df<-as.data.frame(comp$membership)
 # summary(comp.df[,1])
 #plot(cit.net, vertex.col=2+comp)
+
+
+##########################################################################################
+
+# Extract column of FRA20
+fr20.col<-wiot.df.cin[,"FRA20"]
+fr20.col<-as.data.frame(fr20.col)
+rownames(fr20.col)<-cit.names
+fr20.col[,1]<-ifelse(fr20.col[,1]==0, NA, fr20.col[,1])
+fr20.col<-na.omit(fr20.col)
+# The French transportation sector had relationships with 2.192 of 2.464 industries in the whole dataset
+
