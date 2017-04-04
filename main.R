@@ -25,7 +25,7 @@ wiot.df<-as.data.frame(wiot[15])
 wiot.net15.f<-networks(wiot.df,mode="flows")
 wiot.net15.tc<-networks(wiot.df,mode="techcoef")
 
-networks.degree(wiot.df,mode="techcoef")
+networks.degree(wiot.net15.f, 10)
 
 
 
