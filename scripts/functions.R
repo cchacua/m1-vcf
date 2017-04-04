@@ -114,41 +114,110 @@ networks<-function(df, mode="flows", sector="FRA20", subcomponent=TRUE){
     print(paste("Year = ", df[2,5]))
     print(paste("Number of nodes = ", gorder(cit.net.trans)))
     print(paste("Number of Edges = ",gsize(cit.net.trans)))
-    cit.net<-cit.net.trans
-    list(Year=df[2,5], Network=cit.net)
+    x<-list(Year=df[2,5], Network=cit.net.trans)
+    save(x, file=paste0("../outputs/networks/",mode,"/",df[2,5],"_",mode,".RData"))
+    
   }
   else{
     print(paste("Year = ", df[2,5]))
     print(paste("Number of nodes = ", gorder(cit.net)))
     print(paste("Number of Edges = ",gsize(cit.net)))
-    list(Year=df[2,5], Network=cit.net)
+    x<-list(Year=df[2,5], Network=cit.net)
+    save(x, file=paste0("../outputs/networks/",mode,"/",df[2,5],"_",mode,".RData"))
   }
+ 
 }
 
 # Degree as df
-  degree.as.df<-function(network, mode){
+  degree.as.df<-function(network, mode, thousands=TRUE){
     d<-degree(network, mode = mode)
     d<-as.data.frame(d)
     d$type<-firstup(mode)
     colnames(d)<-c("Degree","Type" )
-    d
+    if(thousands==TRUE){
+      d$Degree<-d$Degree/1000
+      d
+    }
+    else{d}
   }
 
-# Create networks and degree distribution graphs
-networks.degree<-function(datalist, binwidth=20){
   
+# Create networks and degree distribution graphs
+networks.degree<-function(datalist, binwidth=20, mode="ind"){
+  # Modes: grid and ind
+  # Types: d, cd, s, cs
   year<-datalist$Year
   cit.net<-datalist$Network
-  d.total<-degree.as.df(cit.net, "total")
-  d.in<-degree.as.df(cit.net, "in")
-  d.out<-degree.as.df(cit.net, "out")
-  degree<-rbind(d.out, d.in, d.total)
-  #degree$Logdegree<-log(degree$Degree)
-  plot<-ggplot(degree, aes(x=Degree)) + geom_histogram(fill="#00B0F6", binwidth=binwidth) + xlab("Degree")+
-    ylab("Frequency")+facet_grid( . ~ Type, scales="free", shrink=FALSE)+ggtitle(year)
+    d.total<-degree.as.df(cit.net, "total")
+    d.in<-degree.as.df(cit.net, "in")
+    d.out<-degree.as.df(cit.net, "out")
   
-  ggsave(paste0("../outputs/degree/", year, "_degree.png", sep=""), plot = plot, device = "png",
-         scale = 1, width = 16, height = 5, units = "cm",
-         dpi = 300, limitsize = TRUE)
+  if(mode=="grid"){  
+    degree<-rbind(d.out, d.in, d.total)
+    #degree$Logdegree<-log(degree$Degree)
+    plot<-ggplot(degree, aes(x=Degree)) + geom_histogram(fill="#00B0F6", binwidth=binwidth) + xlab("Degree")+
+      ylab("Frequency")+facet_grid( . ~ Type, scales="free", shrink=FALSE)+ggtitle(year)
+    ggsave(paste0("../outputs/degree/", year, "_degree.png", sep=""), plot = plot, device = "png",
+           scale = 1, width = 16, height = 5, units = "cm",
+           dpi = 300, limitsize = TRUE)
+    }
+  else if(mode=="ind"){
+    p.total<-ggplot(d.total, aes(x=Degree)) + geom_histogram(fill="#00B0F6", binwidth=binwidth) + xlab("")+ ylab(NULL)+ggtitle("Total")
+    p.in<-ggplot(d.in, aes(x=Degree)) + geom_histogram(fill="#00B0F6", binwidth=binwidth) + xlab("")+ ylab(paste0("Frequency - ", year))+ggtitle("In")
+    p.out<-ggplot(d.out, aes(x=Degree)) + geom_histogram(fill="#00B0F6", binwidth=binwidth) + xlab("Degree")+ ylab(NULL)+ggtitle("Out")
+    
+    plot<-grid.arrange(p.in, p.out, p.total, ncol=3)
+    
+    ggsave(paste0("../outputs/degree/", year, "_degree.png", sep=""), plot = plot, device = "png",
+           scale = 1, width = 16, height = 5, units = "cm",
+           dpi = 300, limitsize = TRUE)
+  }
+  else{print("Select a correct mode: grid or ind")}
+}
+
+# Strength as df
+strength.as.df<-function(network, mode, thousands=TRUE){
+  d<-strength(network, mode = mode)
+  d<-as.data.frame(d)
+  d$type<-firstup(mode)
+  colnames(d)<-c("Strength","Type" )
+  if(thousands==TRUE){
+    d$Strength<-d$Strength/1000
+    d
+  }
+  else{d}
+}
+
+# Strenght distribution
+networks.strenght<-function(datalist, binwidth=20, mode="ind", thousands=TRUE){
+  # Modes: grid and ind
+  # Types: d, cd, s, cs
+  year<-datalist$Year
+  cit.net<-datalist$Network
+  d.total<-strength.as.df(cit.net, "total", thousands)
+  d.in<-strength.as.df(cit.net, "in", thousands)
+  d.out<-strength.as.df(cit.net, "out", thousands)
+  
+  if(mode=="grid"){  
+    degree<-rbind(d.out, d.in, d.total)
+    #degree$Logdegree<-log(degree$Strength)
+    plot<-ggplot(degree, aes(x=Strength)) + geom_histogram(fill="#00BA38", binwidth=binwidth) + xlab("Strength")+
+      ylab("Frequency")+facet_grid( . ~ Type, scales="free", shrink=FALSE)+ggtitle(year)
+    ggsave(paste0("../outputs/strength/", year, "_strength.png", sep=""), plot = plot, device = "png",
+           scale = 1, width = 16, height = 5, units = "cm",
+           dpi = 300, limitsize = TRUE)
+  }
+  else if(mode=="ind"){
+    p.total<-ggplot(d.total, aes(x=Strength)) + geom_histogram(fill="#00BA38", binwidth=binwidth) + xlab("")+ ylab(NULL)+ggtitle("Total")
+    p.in<-ggplot(d.in, aes(x=Strength)) + geom_histogram(fill="#00BA38", binwidth=binwidth) + xlab("")+ ylab(paste0("Frequency - ", year))+ggtitle("In")
+    p.out<-ggplot(d.out, aes(x=Strength)) + geom_histogram(fill="#00BA38", binwidth=binwidth) + xlab("Strength")+ ylab(NULL)+ggtitle("Out")
+    
+    plot<-grid.arrange(p.in, p.out, p.total, ncol=3)
+    
+    ggsave(paste0("../outputs/strength/", year, "_Strength.png", sep=""), plot = plot, device = "png",
+           scale = 1, width = 16, height = 5, units = "cm",
+           dpi = 300, limitsize = TRUE)
+  }
+  else{print("Select a correct mode: grid or ind")}
 }
 

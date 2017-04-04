@@ -11,3 +11,8 @@ rm(wiot.ci.matrix)
 wiot.cit.matrix<-lapply(wiot,cit.matrix)
 save(wiot.cit.matrix, file="../outputs/wiot.cit.matrix.RData")
 rm(wiot.cit.matrix)
+
+
+# Create networks
+lapply(wiot, networks, mode="flows")
+lapply(wiot, networks, mode="techcoef")

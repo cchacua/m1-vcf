@@ -11,7 +11,7 @@ install.packages('sna')
 install.packages('ndtv', dependencies=T)
 install.packages("reshape2")
 install.packages('visNetwork')
-
+install.packages("gridExtra", dependencies=T)
 
 # http://curleylab.psych.columbia.edu/netviz/netviz1.html#/51
 # http://kateto.net/network-visualization

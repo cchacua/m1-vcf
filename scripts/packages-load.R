@@ -5,7 +5,6 @@
 #library('sna')
 library('reshape2')
 library('igraph')
-library('visNetwork')
+#library('visNetwork')
 library('ggplot2')
-
-
+library("gridExtra")
