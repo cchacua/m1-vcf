@@ -25,9 +25,40 @@ wiot.df<-as.data.frame(wiot[15])
 wiot.net15.f<-networks(wiot.df,mode="flows")
 wiot.net15.tc<-networks(wiot.df,mode="techcoef")
 
-deg.dist<-degree_distribution(wiot.net15.f, cumulative=T, mode="all")
-plot(x=0:max(deg), y=1-deg.dist, pch=19, cex=1.2, col="orange",
+
+net<-wiot.net15.f
+
+d.total<-degree(net, mode = "total")
+d.out<-degree(net, mode = "out")
+d.in<-degree(net, mode = "in")
+d.total<-as.data.frame(d.total)
+d.total$type<-"Total"
+colnames(d.total)<-c("Degree","Type" )
+d.out<-as.data.frame(d.out)
+d.out$type<-"Out"
+colnames(d.out)<-c("Degree","Type" )
+d.in<-as.data.frame(d.in)
+d.in$type<-"In"
+colnames(d.in)<-c("Degree","Type" )
+degree<-rbind(d.out, d.in, d.total)
+#degree$Logdegree<-log(degree$Degree)
+plot<-ggplot(degree, aes(x=Degree)) + geom_histogram(fill="#F8766D") + xlab("Degree")+
+  ylab("Frequency")+facet_grid( . ~ Type, scales="free_x")+ggtitle("2014")
+
+ggsave("myplot.png", plot = plot, device = "png",
+       scale = 1, width = 16, height = 5, units = "cm",
+       dpi = 300, limitsize = TRUE)
+
+
+
+
+ggsave(paste0("../output/", "filename", ".png", sep=""), width = 16, height = 5, units = "cm", scale=1)
+
+
+deg.dist.total<-degree_distribution(net, cumulative=T, mode="total")
+plot(x=0:max(d.total$Degree), y=1-deg.dist.total, pch=19, cex=1.2, col="orange",
       xlab="Degree", ylab="Cumulative Frequency")
+
 
 
 # Get neighbor edges
