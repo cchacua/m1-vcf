@@ -108,7 +108,7 @@ networks<-function(df, mode="flows", sector="FRA20", subcomponent=TRUE){
     print(paste("Year = ", df[2,5]))
     print(paste("Number of nodes = ", gorder(cit.net.trans)))
     print(paste("Number of Edges = ",gsize(cit.net.trans)))
-    cit.net.trans
+    cit.net<-cit.net.trans
   }
   else{
     print(paste("Year = ", df[2,5]))
@@ -116,5 +116,68 @@ networks<-function(df, mode="flows", sector="FRA20", subcomponent=TRUE){
     print(paste("Number of Edges = ",gsize(cit.net)))
     cit.net
   }
+}
+
+
+# Create networks and degree distribution graphs
+networks.degree<-function(df, mode="flows", sector="FRA20", subcomponent=TRUE){
+  
+  # Modes: "flows", "techcoef", "value"
+  df<-as.data.frame(df)
+  
+  if(mode=="flows"){
+    df.cin<-ci.matrix(df)
+  }
+  else if(mode=="techcoef"){
+    df.cin<-cit.matrix(df)
+  }
+  else {print("Enter a valid mode: flows, techcoef, value")}
+  
+  # Matrix and graph
+  cit.imatrix<-as.matrix(df.cin)
+  cit.net<-graph_from_adjacency_matrix(cit.imatrix, mode="directed",  weighted = TRUE, diag = TRUE)
+  
+  
+  # Extract only the subcomponent where "sector" is located
+  if(subcomponent==TRUE){      
+    cit.net.trans.list<-subcomponent(cit.net,   sector, mode ="all")
+    cit.net.trans<-induced_subgraph(cit.net, cit.net.trans.list)
+    # # To verify there is only a connected component
+    # cit.net.trans.clus<-components(cit.net.trans, mode ="weak")
+    # cit.net.trans.clus.mem<-as.data.frame(cit.net.trans.clus[1])
+    # summary(cit.net.trans.clus.mem[,1])
+    # To get the number of nodes
+    print(paste("Year = ", df[2,5]))
+    print(paste("Number of nodes = ", gorder(cit.net.trans)))
+    print(paste("Number of Edges = ",gsize(cit.net.trans)))
+    cit.net<-cit.net.trans
+  }
+  else{
+    print(paste("Year = ", df[2,5]))
+    print(paste("Number of nodes = ", gorder(cit.net)))
+    print(paste("Number of Edges = ",gsize(cit.net)))
+    cit.net
+  }
+  
+  d.total<-degree(cit.net, mode = "total")
+  d.out<-degree(cit.net, mode = "out")
+  d.in<-degree(cit.net, mode = "in")
+  d.total<-as.data.frame(d.total)
+  d.total$type<-"Total"
+  colnames(d.total)<-c("Degree","Type" )
+  d.out<-as.data.frame(d.out)
+  d.out$type<-"Out"
+  colnames(d.out)<-c("Degree","Type" )
+  d.in<-as.data.frame(d.in)
+  d.in$type<-"In"
+  colnames(d.in)<-c("Degree","Type" )
+  degree<-rbind(d.out, d.in, d.total)
+  #degree$Logdegree<-log(degree$Degree)
+  plot<-ggplot(degree, aes(x=Degree)) + geom_histogram(fill="#00B0F6") + xlab("Degree")+
+    ylab("Frequency")+facet_grid( . ~ Type, scales="free_x")+ggtitle(df[2,5])
+  
+  ggsave(paste0("../outputs/degree", df[2,5], "_degree.png", sep=""), plot = plot, device = "png",
+         scale = 1, width = 16, height = 5, units = "cm",
+         dpi = 300, limitsize = TRUE)
 }
 
