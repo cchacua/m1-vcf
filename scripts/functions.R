@@ -71,6 +71,51 @@ cit.matrix<-function(df){
   wiot.df.cin
 }
 
+# Leontieff matrix
+# http://qua.st/decompr/leontief-interpretation/
+leontief.matrix<-function(df){
+  df<-as.data.frame(df)
+  # CI data goes until line 2464= 44 countries * 56 sectors
+  # Line 2472 (GO) has the Output at basic prices
+  
+  #Technical coefficients matrix
+  ci<-df[c(1:2464, 2472),6:2469]
+  cin<-sapply(ci, dividelast)
+  cin<-as.data.frame(cin)
+  cit.names<-colnames(cin)
+  cit.names<-unique(cit.names)
+  cit.names<-remRight(cit.names,2)
+  #rownames(df.cin)<-cit.names
+  colnames(cin)<-cit.names
+  
+  # I-A
+  ia<-diag(nrow(cin))-cin
+  
+  L<-solve(ia)
+}
+
+leontief.matrix<-function(df){
+  df<-as.data.frame(df)
+  # CI data goes until line 2464= 44 countries * 56 sectors
+  # Line 2472 (GO) has the Output at basic prices
+  
+  #Technical coefficients matrix
+  ci<-df[c(1:2464, 2472),6:2469]
+  cin<-sapply(ci, dividelast)
+  cin<-as.data.frame(cin)
+  cit.names<-colnames(cin)
+  cit.names<-unique(cit.names)
+  cit.names<-remRight(cit.names,2)
+  #rownames(df.cin)<-cit.names
+  colnames(cin)<-cit.names
+  
+  # I-A
+  ia<-diag(nrow(cin))-cin
+  
+  L<-solve(ia)
+  
+}
+
 # Extract production of each year for the transportation sector
 prod.fr20<-function(df){
   wiot.df<-as.data.frame(df)
