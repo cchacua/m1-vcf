@@ -88,7 +88,7 @@ wiot<-open.rdata("../outputs/wiot.RData")
     networks.degree(y, .1)
   })
   
-  lapply(n.techcoef.files,function(x){
+  lapply(n.techcoef.files[1],function(x){
     y<-open.rdata(x)
     networks.strenght(y, binwidth=.1, thousands = FALSE)
   })
