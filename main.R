@@ -19,6 +19,9 @@ source("./scripts/functions.R")
 # Load data
 wiot<-open.rdata("../outputs/wiot.RData")
 
+# Connected components
+  #comp.distribution(wiot[1])
+
 #####
 # Networks of flows
 #####
@@ -61,16 +64,6 @@ wiot<-open.rdata("../outputs/wiot.RData")
 # Networks of technical coefficients
 #####
   n.techcoef.files<-list.files(path="../outputs/networks/techcoef", full.names=TRUE)
-  lapply(n.techcoef.files,function(x){
-    y<-open.rdata(x)
-    networks.degree(y, .1)
-  })
-  
-  lapply(n.techcoef.files,function(x){
-    y<-open.rdata(x)
-    networks.strenght(y, binwidth=.1, thousands = FALSE)
-  })
-  
   
   # Special Cases
   # Negative value added: 2013: Luxembourg 35 Postal and courier activities and 32 Water transport
@@ -81,7 +74,10 @@ wiot<-open.rdata("../outputs/wiot.RData")
   y.df<-wiot[14]
   y.df<-as.data.frame(y.df)
   View(y.df[,c("IndustryCode", "IndustryDescription", "Country", "RNr", "LUX32", "LUX35")])
-
+  y.sum<-sum(y.df[1:2464,"LUX32"])
+  y.sum/y.df[2472,"LUX32"]
+  
+  
   #networks.strenght(y,  binwidth=.1, thousands = FALSE)
   
   # 2012 MLT4 Mining and quarrying
@@ -102,6 +98,20 @@ wiot<-open.rdata("../outputs/wiot.RData")
   y.s<-strength(y$Network, mode = "in")
   y.s<-as.data.frame(y.s)
   #networks.strenght(y,  binwidth=.1, thousands = FALSE)
+  
+  
+  lapply(n.techcoef.files,function(x){
+    y<-open.rdata(x)
+    networks.degree(y, .1)
+  })
+  
+  lapply(n.techcoef.files,function(x){
+    y<-open.rdata(x)
+    networks.strenght(y, binwidth=.1, thousands = FALSE)
+  })
+  
+  
+  
   
 # Leontief Matrix
   

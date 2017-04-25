@@ -173,6 +173,33 @@ networks<-function(df, mode="flows", sector="FRA20", subcomponent=TRUE){
  
 }
 
+# Graph component distribution
+comp.distribution<-function(df, mode="flows", binwidth=20){
+  
+  # Modes: "flows", "techcoef", "value"
+  df<-as.data.frame(df)
+  
+  if(mode=="flows"){
+    df.cin<-ci.matrix(df)
+  }
+  else if(mode=="techcoef"){
+    df.cin<-cit.matrix(df)
+  }
+  else {print("Enter a valid mode: flows, techcoef, value")}
+  
+  # Matrix and graph
+  cit.imatrix<-as.matrix(df.cin)
+  cit.net<-graph_from_adjacency_matrix(cit.imatrix, mode="directed",  weighted = TRUE, diag = TRUE)
+  
+  cit.net.clus<-components(cit.net, mode ="weak")
+  cit.net.clus.mem<-as.data.frame(cit.net.clus[1])
+  cit.net.clus.mem$country<-rownames(cit.net.clus.mem)
+  cit.net.clus.mem$membership<-ifelse(cit.net.clus.mem$membership==1, NA, cit.net.clus.mem$membership)
+  #colnames(cit.net.clus.mem)<-c("Size", "Number")
+  dist<-ggplot(cit.net.clus.mem, aes(x=membership)) + geom_histogram(fill="#00B0F6", binwidth=binwidth) + xlab("")+ ylab(NULL)+ggtitle("Total")
+  dist
+}
+
 # Degree as df
   degree.as.df<-function(network, mode, thousands=TRUE){
     d<-degree(network, mode = mode)
