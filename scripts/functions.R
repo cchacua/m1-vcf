@@ -129,7 +129,6 @@ leontief.matrix2<-function(df){
 }
 
 
-
 # Create networks
 networks<-function(df, mode="flows", sector="FRA20", subcomponent=TRUE){
   
@@ -236,9 +235,9 @@ networks.degree<-function(datalist, binwidth=20, mode="ind"){
            dpi = 300, limitsize = TRUE)
     }
   else if(mode=="ind"){
-    p.total<-ggplot(d.total, aes(x=Degree)) + geom_histogram(fill="#00B0F6", binwidth=binwidth) + xlab("")+ ylab(NULL)+ggtitle("Total")
-    p.in<-ggplot(d.in, aes(x=Degree)) + geom_histogram(fill="#00B0F6", binwidth=binwidth) + xlab("")+ ylab(paste0("Frequency - ", year))+ggtitle("In")
-    p.out<-ggplot(d.out, aes(x=Degree)) + geom_histogram(fill="#00B0F6", binwidth=binwidth) + xlab("Degree")+ ylab(NULL)+ggtitle("Out")
+    p.total<-ggplot(d.total, aes(x=Degree)) + geom_histogram(fill="#00B0F6", binwidth=binwidth) + xlab("")+ ylab(NULL)+ggtitle("Total")+ geom_point(aes(x=d.total["FRA20","Degree"], y=2, size = 1, colour = "#FEFEFE", shape =8))+ scale_shape_identity()+ theme(legend.position="none")
+    p.in<-ggplot(d.in, aes(x=Degree)) + geom_histogram(fill="#00B0F6", binwidth=binwidth) + xlab("")+ ylab(paste0("Frequency - ", year))+ggtitle("In")+ geom_point(aes(x=d.in["FRA20","Degree"], y=2, size = 1, colour = "#FEFEFE", shape =8))+ scale_shape_identity()+ theme(legend.position="none")
+    p.out<-ggplot(d.out, aes(x=Degree)) + geom_histogram(fill="#00B0F6", binwidth=binwidth) + xlab("Degree")+ ylab(NULL)+ggtitle("Out")+ geom_point(aes(x=d.out["FRA20","Degree"], y=2, size = 1, colour = "#FEFEFE", shape =8))+ scale_shape_identity()+ theme(legend.position="none")
     
     plot<-grid.arrange(p.in, p.out, p.total, ncol=3)
     
@@ -282,9 +281,9 @@ networks.strenght<-function(datalist, binwidth=20, mode="ind", thousands=TRUE){
            dpi = 300, limitsize = TRUE)
   }
   else if(mode=="ind"){
-    p.total<-ggplot(d.total, aes(x=Strength)) + geom_histogram(fill="#00BA38", binwidth=binwidth) + xlab("")+ ylab(NULL)+ggtitle("Total")+ geom_point(aes(x=d.total["FRA20","Strength"], y=2, size = 1, colour = "#AE3121", shape =8))+ scale_shape_identity()+ theme(legend.position="none")
-    p.in<-ggplot(d.in, aes(x=Strength)) + geom_histogram(fill="#00BA38", binwidth=binwidth) + xlab("")+ ylab(paste0("Frequency - ", year))+ggtitle("In")+ geom_point(aes(x=d.in["FRA20","Strength"], y=2, size = 1, colour = "#AE3121", shape =8))+ scale_shape_identity()+ theme(legend.position="none")
-    p.out<-ggplot(d.out, aes(x=Strength)) + geom_histogram(fill="#00BA38", binwidth=binwidth) + xlab("Strength")+ ylab(NULL)+ggtitle("Out")+ geom_point(aes(x=d.out["FRA20","Strength"], y=2, size = 1, colour = "#AE3121", shape =8))+ scale_shape_identity()+ theme(legend.position="none")
+    p.total<-ggplot(d.total, aes(x=Strength)) + geom_histogram(fill="#00BA38", binwidth=binwidth) + xlab("")+ ylab(NULL)+ggtitle("Total")+ geom_point(aes(x=d.total["FRA20","Strength"], y=2, size = 1, colour = "#FEFEFE", shape =8))+ scale_shape_identity()+ theme(legend.position="none")
+    p.in<-ggplot(d.in, aes(x=Strength)) + geom_histogram(fill="#00BA38", binwidth=binwidth) + xlab("")+ ylab(paste0("Frequency - ", year))+ggtitle("In")+ geom_point(aes(x=d.in["FRA20","Strength"], y=2, size = 1, colour = "#FEFEFE", shape =8))+ scale_shape_identity()+ theme(legend.position="none")
+    p.out<-ggplot(d.out, aes(x=Strength)) + geom_histogram(fill="#00BA38", binwidth=binwidth) + xlab("Strength")+ ylab(NULL)+ggtitle("Out")+ geom_point(aes(x=d.out["FRA20","Strength"], y=2, size = 1, colour = "#FEFEFE", shape =8))+ scale_shape_identity()+ theme(legend.position="none")
     
     plot<-grid.arrange(p.in, p.out, p.total, ncol=3)
     

@@ -14,5 +14,10 @@ rm(wiot.cit.matrix)
 
 
 # Create networks
-lapply(wiot, networks, mode="flows")
+lapply(wiot.files, function(x){
+  y<-open.rdata(x)
+  networks(y, mode="flows")
+})
+
+#lapply(wiot, networks, mode="flows")
 lapply(wiot, networks, mode="techcoef")

@@ -17,7 +17,7 @@ source("./scripts/functions.R")
 
 
 # Load data
-wiot<-open.rdata("../outputs/wiot.RData")
+  #wiot<-open.rdata("../outputs/wiot.RData")
 
 # Connected components
   #comp.distribution(wiot[1])
@@ -83,18 +83,40 @@ wiot<-open.rdata("../outputs/wiot.RData")
   # "MLT4"
   #c("LUX32", "LUX35", "MLT4", "LVA33")
   
+  # Degree distribution
   lapply(n.techcoef.files,function(x){
     y<-open.rdata(x)
     networks.degree(y, .1)
   })
   
-  lapply(n.techcoef.files[1],function(x){
+  # Strength distribution
+  lapply(n.techcoef.files,function(x){
     y<-open.rdata(x)
     networks.strenght(y, binwidth=.1, thousands = FALSE)
   })
   
+  # Network size
+  sizes<-lapply(n.techcoef.files,function(x){
+    y<-open.rdata(x)
+    year<-y$Year
+    net<-y$Network
+    nodes<-gorder(net)
+    edges<-gsize(net)
+    w<-c(Year=year,Nodes=nodes,Edges=edges)
+  })
+  sizes<-t(as.data.frame(sizes))
+  sizes<-as.data.frame(sizes)
+  rownames(sizes)<-sizes$Year
   
+  nodesizes.plot<-ggplot(sizes, aes(Year, Nodes, colour="#7CAE00")) + geom_line(size=1)+ geom_point(size=2)+xlab("Year") + ylab("Number of nodes")+ theme(legend.position="none")
+  ggsave(paste0("../outputs/","node_sizes", ".png", sep=""), plot = nodesizes.plot, device = "png",
+         scale = 1, width = 16, height = 5, units = "cm",
+         dpi = 300, limitsize = TRUE) 
   
+  edgesizes.plot<-ggplot(sizes, aes(Year, Edges, colour="#7CAE00")) + geom_line(size=1)+ geom_point(size=2)+xlab("Year") + ylab("Number of edges")+ theme(legend.position="none")
+  ggsave(paste0("../outputs/","edge_sizes", ".png", sep=""), plot = edgesizes.plot, device = "png",
+         scale = 1, width = 16, height = 5, units = "cm",
+         dpi = 300, limitsize = TRUE) 
   
 # Leontief Matrix
   
