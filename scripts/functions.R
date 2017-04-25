@@ -13,6 +13,18 @@ remRight <- function(x, n){
 # Open Rdata as dataframe
 open.rdata<-function(x){local(get(load(x)))}
 
+# Extract production of each year for the transportation sector
+prod.fr20<-function(df){
+  wiot.df<-as.data.frame(df)
+  value<-wiot.df[2472, c("FRA20", "Year")]
+}
+
+# Capitalize first letter
+firstup <- function(x) {
+  substr(x, 1, 1) <- toupper(substr(x, 1, 1))
+  x
+}
+
 # Divide a column by its last value  
 dividelast<-function(column){
   #column<-wiot.df.ci[,1]
@@ -94,7 +106,7 @@ leontief.matrix<-function(df){
   L<-solve(ia)
 }
 
-leontief.matrix<-function(df){
+leontief.matrix2<-function(df){
   df<-as.data.frame(df)
   # CI data goes until line 2464= 44 countries * 56 sectors
   # Line 2472 (GO) has the Output at basic prices
@@ -116,17 +128,7 @@ leontief.matrix<-function(df){
   
 }
 
-# Extract production of each year for the transportation sector
-prod.fr20<-function(df){
-  wiot.df<-as.data.frame(df)
-  value<-wiot.df[2472, c("FRA20", "Year")]
-}
 
-# Capitalize first letter
-firstup <- function(x) {
-  substr(x, 1, 1) <- toupper(substr(x, 1, 1))
-  x
-}
 
 # Create networks
 networks<-function(df, mode="flows", sector="FRA20", subcomponent=TRUE){
@@ -145,7 +147,7 @@ networks<-function(df, mode="flows", sector="FRA20", subcomponent=TRUE){
   # Matrix and graph
   cit.imatrix<-as.matrix(df.cin)
   cit.net<-graph_from_adjacency_matrix(cit.imatrix, mode="directed",  weighted = TRUE, diag = TRUE)
-  
+  cit.net<-delete_vertices(cit.net, c("LUX32", "LUX35", "MLT4", "LVA33"))
   
   # Extract only the subcomponent where "sector" is located
   if(subcomponent==TRUE){      
@@ -293,3 +295,12 @@ networks.strenght<-function(datalist, binwidth=20, mode="ind", thousands=TRUE){
   else{print("Select a correct mode: grid or ind")}
 }
 
+# Sectors with negative added-values
+  manip.negav<-function(numberlist=n.techcoef.files[15]){
+    print(numberlist)  
+    y<-open.rdata(numberlist) 
+    y.s<-strength(y$Network, mode = "in")
+    y.s<-as.data.frame(y.s)
+    y.s$country<-rownames(y.s)
+    print(y.s[y.s$y.s>=1,])
+  }

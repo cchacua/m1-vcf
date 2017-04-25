@@ -66,39 +66,22 @@ wiot<-open.rdata("../outputs/wiot.RData")
   n.techcoef.files<-list.files(path="../outputs/networks/techcoef", full.names=TRUE)
   
   # Special Cases
-  # Negative value added: 2013: Luxembourg 35 Postal and courier activities and 32 Water transport
-  # TOP CI: BRA10 DNK10 Manufacture of coke and refined petroleum products MLT4 Mining and quarrying
-  y<-open.rdata(n.techcoef.files[14]) 
-  y.s<-strength(y$Network, mode = "in")
-  y.s<-as.data.frame(y.s)
-  y.df<-wiot[14]
-  y.df<-as.data.frame(y.df)
-  View(y.df[,c("IndustryCode", "IndustryDescription", "Country", "RNr", "LUX32", "LUX35")])
-  y.sum<-sum(y.df[1:2464,"LUX32"])
-  y.sum/y.df[2472,"LUX32"]
+  # Negative value added: 
   
+  lapply(n.techcoef.files, manip.negav)
   
-  #networks.strenght(y,  binwidth=.1, thousands = FALSE)
-  
-  # 2012 MLT4 Mining and quarrying
-  y.df<-wiot[13]
-  y.df<-as.data.frame(y.df)
-  View(y.df[,c("IndustryCode", "IndustryDescription", "Country", "RNr", "MLT4")])
-  y<-open.rdata(n.techcoef.files[13])
-  y.s<-strength(y$Network, mode = "in")
-  y.s<-as.data.frame(y.s)
-  #networks.strenght(y,  binwidth=.1, thousands = FALSE)
-  
-  
-  # 2011 MLT4 Mining and quarrying, 33 Air transport
-  y.df<-wiot[12]
-  y.df<-as.data.frame(y.df)
-  View(y.df[,c("IndustryCode", "IndustryDescription", "Country", "RNr", "MLT4", "LVA33")])
-  y<-open.rdata(n.techcoef.files[12])
-  y.s<-strength(y$Network, mode = "in")
-  y.s<-as.data.frame(y.s)
-  #networks.strenght(y,  binwidth=.1, thousands = FALSE)
-  
+  # In brief, sectors that were deleted are:
+  #2014
+  #"LUX32", "MLT4"
+  #2013
+  #"LUX32", "LUX35", 
+  #2012
+  #"MLT4"
+  #2011
+  #"MLT4", "LVA33"
+  #2000
+  # "MLT4"
+  #c("LUX32", "LUX35", "MLT4", "LVA33")
   
   lapply(n.techcoef.files,function(x){
     y<-open.rdata(x)
