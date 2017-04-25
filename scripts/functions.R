@@ -282,7 +282,7 @@ networks.strenght<-function(datalist, binwidth=20, mode="ind", thousands=TRUE){
            dpi = 300, limitsize = TRUE)
   }
   else if(mode=="ind"){
-    p.total<-ggplot(d.total, aes(x=Strength)) + geom_histogram(fill="#00BA38", binwidth=binwidth) + xlab("")+ ylab(NULL)+ggtitle("Total")+ geom_point(aes(x=d.total["FRA20","Strength"], y=2, size = 1, colour = "#F8766D", shape =15))+ scale_shape_identity()+ theme(legend.position="none")
+    p.total<-ggplot(d.total, aes(x=Strength)) + geom_histogram(fill="#00BA38", binwidth=binwidth) + xlab("")+ ylab(NULL)+ggtitle("Total")+ geom_point(aes(x=d.total["FRA20","Strength"], y=2, size = 1, colour = "#F8766D", shape =8))+ scale_shape_identity()+ theme(legend.position="none")
     p.in<-ggplot(d.in, aes(x=Strength)) + geom_histogram(fill="#00BA38", binwidth=binwidth) + xlab("")+ ylab(paste0("Frequency - ", year))+ggtitle("In")
     p.out<-ggplot(d.out, aes(x=Strength)) + geom_histogram(fill="#00BA38", binwidth=binwidth) + xlab("Strength")+ ylab(NULL)+ggtitle("Out")
     
