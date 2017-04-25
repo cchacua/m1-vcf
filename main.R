@@ -118,7 +118,15 @@ source("./scripts/functions.R")
          scale = 1, width = 16, height = 5, units = "cm",
          dpi = 300, limitsize = TRUE) 
   
+  
 # Leontief Matrix
   
   L<-leontief.matrix(wiot[12])
   
+  df<-lapply(wiot.files[1], function(x){
+    y<-open.rdata(x)
+  })
+  df<-as.data.frame(df)
+  
+  
+  test.valuedaddedmatrix<-valueadded.matrix(df)

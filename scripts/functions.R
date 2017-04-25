@@ -102,37 +102,43 @@ leontief.matrix<-function(df){
   
   # I-A
   ia<-diag(nrow(cin))-cin
-  
   L<-solve(ia)
 }
 
-leontief.matrix2<-function(df){
+# Value-added contribution matrix
+valueadded.matrix<-function(df){
   df<-as.data.frame(df)
   # CI data goes until line 2464= 44 countries * 56 sectors
   # Line 2472 (GO) has the Output at basic prices
   
   #Technical coefficients matrix
-  ci<-df[c(1:2464, 2472),6:2469]
-  cin<-sapply(ci, dividelast)
+  cin<-df[c(1:2464, 2472),6:2469]
+  cin<-sapply(cin, dividelast)
   cin<-as.data.frame(cin)
   cit.names<-colnames(cin)
   cit.names<-unique(cit.names)
   cit.names<-remRight(cit.names,2)
   #rownames(df.cin)<-cit.names
   colnames(cin)<-cit.names
-  
   # I-A
-  ia<-diag(nrow(cin))-cin
+  cin<-diag(nrow(cin))-cin
+  cin<-solve(cin)
   
-  L<-solve(ia)
+  va.df<-df[c(2470, 2472),6:2469]
+  va.df<-as.data.frame(t(va.df))
+  va.df$valuead<-ifelse(va.df[,2]==0, va.df[,1]/1, va.df[,1]/va.df[,2])
+  #va.df$valuead<-va.df[,1]/va.df[,2]
+  va.matrix<-diag(va.df$valuead)
   
+  valcontrib<-va.matrix %*% cin
 }
+
 
 
 # Create networks
 networks<-function(df, mode="flows", sector="FRA20", subcomponent=TRUE){
   
-  # Modes: "flows", "techcoef", "value"
+  # Modes: "flows", "techcoef", "valueadded"
   df<-as.data.frame(df)
   
   if(mode=="flows"){
@@ -141,7 +147,10 @@ networks<-function(df, mode="flows", sector="FRA20", subcomponent=TRUE){
   else if(mode=="techcoef"){
     df.cin<-cit.matrix(df)
   }
-  else {print("Enter a valid mode: flows, techcoef, value")}
+  else if(mode=="valueadded"){
+    df.cin<-valueadded.matrix(df)
+  }
+  else {print("Enter a valid mode: flows, techcoef, valueadded")}
   
   # Matrix and graph
   cit.imatrix<-as.matrix(df.cin)
