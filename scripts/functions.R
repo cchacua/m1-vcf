@@ -339,5 +339,39 @@ networks.strenght<-function(datalist, binwidth=20, mode="ind", thousands=TRUE){
            dpi = 300, limitsize = TRUE) 
     
   }
-  
+
+  graph.clustering<-function(list, name="network"){
+    clustering<-lapply(list,function(x){
+      y<-open.rdata(x)
+      year<-y$Year
+      net<-y$Network
+      net<-as.undirected(net, mode="collapse")
+      local<-transitivity(net,  vids ="FRA20" ,type="local")
+      averagecl<-transitivity(net,type="average")
+      global<-transitivity(net, type="global")
+      
+      localw<-transitivity(net,  vids ="FRA20" ,type="weighted")
+      
+      localwall<-transitivity(net,type="weighted")
+      localwall<-as.data.frame(localwall)
+      localwall$values<-ifelse(localwall$localwall==Inf, NA, localwall$localwall)
+      localwall$values<-ifelse(localwall$localwall>=1, 1, localwall$localwall)
+      localwall<-mean(localwall$values, na.rm =TRUE)
+      
+      print(year)
+      w<-c(Year=year,Local=local, Average=averagecl, Global=global, Local_W=localw,Average_W=localwall )
+    })
+    clustering<-as.data.frame(clustering)
+    clustering<-t(clustering)
+    clustering<-as.data.frame(clustering)
+    #rownames(clustering)<-clustering$Year
+    clustering<- melt(clustering, id="Year")
+    write.csv(clustering, paste0("../outputs/clustering_",name,".csv", sep=""))
+    
+    clustering.graph<-ggplot(data=clustering, aes(x=Year, y=value, group=variable, color=variable)) + geom_line() + geom_point()+ylab("Clustering coefficient")+ guides(fill=guide_legend(title=NULL))
+    
+    ggsave(paste0("../outputs/",name, ".png", sep=""), plot = clustering.graph, device = "png",
+           scale = 1, width = 10, height = 5, units = "cm",
+           dpi = 300, limitsize = TRUE) 
+  }    
   

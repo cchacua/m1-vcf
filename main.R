@@ -65,11 +65,20 @@ source("./scripts/functions.R")
     year<-y$Year
     net<-y$Network
     net<-as.undirected(net, mode="collapse")
-    localw<-transitivity(net,  vids ="FRA20" ,type="weighted")
+    local<-transitivity(net,  vids ="FRA20" ,type="local")
     averagecl<-transitivity(net,type="average")
     global<-transitivity(net, type="global")
+    
+    localw<-transitivity(net,  vids ="FRA20" ,type="weighted")
+    
+    localwall<-transitivity(net,type="weighted")
+    localwall<-as.data.frame(localwall)
+    localwall$values<-ifelse(localwall$localwall==Inf, NA, localwall$localwall)
+    localwall$values<-ifelse(localwall$localwall>=1, 1, localwall$localwall)
+    localwall<-mean(localwall$values, na.rm =TRUE)
+    
     print(year)
-    w<-c(Year=year,Local=localw, Average=averagecl, Global=global)
+    w<-c(Year=year,Local=local, Average=averagecl, Global=global, Local_W=localw,Average_W=localwall )
   })
   clustering.flow.2<-as.data.frame(clustering.flow)
   clustering.flow.2<-t(clustering.flow.2)
@@ -78,9 +87,11 @@ source("./scripts/functions.R")
   clustering.flow.2<- melt(clustering.flow.2, id="Year")
   write.csv(clustering.flow.2, "../outputs/clustering.flow.csv")
   
-  clustering.flow.graph<-ggplot(data=clustering.flow.2, aes(x=Year, y=value, group=variable, color=variable)) + geom_line() + geom_point()
-  clustering.flow.graph
+  clustering.flow.graph<-ggplot(data=clustering.flow.2, aes(x=Year, y=value, group=variable, color=variable)) + geom_line() + geom_point()+ylab("Clustering coefficient")+ guides(fill=guide_legend(title=NULL))
   
+  ggsave(paste0("../outputs/","clustering.flow", ".png", sep=""), plot = clustering.flow.graph, device = "png",
+         scale = 1, width = 10, height = 5, units = "cm",
+         dpi = 300, limitsize = TRUE) 
   
 #####
 # Network of technical coefficients
@@ -144,7 +155,7 @@ source("./scripts/functions.R")
     # net.2000.ci<-open.rdata(n.techcoef.files[1])
     # net.2000.ci<-net.2000.ci$Network
     # subcomponent(net.2000.ci,"AUS49", mode ="all")
-
+  graph.clustering(n.techcoef.files)
 #####
 # Networks of value added
 #####    

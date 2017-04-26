@@ -243,4 +243,35 @@ test.valuedaddedmatrix<-valueadded.matrix(df)
 test.valuedaddedmatrix<-as.data.frame(test.valuedaddedmatrix)
 
 
+#################################
+# clustering.flow<-lapply(,function(x){
+df<-lapply(wiot.files[1], function(x){
+  y<-open.rdata(x)
+})
+df<-as.data.frame(df)
+View(df[c(462,1578),])
+View(df[,c("IndustryDescription","CYP14", "LVA10")])
+df$IndustryDescription
 
+  y<-open.rdata(n.flows.files[1])
+  year<-y$Year
+  net<-y$Network
+  # gorder(net)
+  # gsize(net)
+  # net2<-delete.vertices(net,which(degree(net)<1))
+  # gorder(net2)
+  # gsize(net2)
+  net<-as.undirected(net, mode="collapse")
+  localw<-transitivity(net,  vids ="FRA20" ,type="weighted")
+  
+  localwall<-transitivity(net,type="weighted")
+  localwall2<-as.data.frame(localwall)
+  localwall2$values<-ifelse(localwall2$localwall==Inf, NA, localwall2$localwall)
+  localwall2$values<-ifelse(localwall2$localwall>=1, 1, localwall2$localwall)
+  localwall2<-mean(localwall2$values, na.rm =TRUE)
+  
+  local<-transitivity(net,  vids ="FRA20" ,type="local")
+  averagecl<-transitivity(net,type="average")
+  global<-transitivity(net, type="global")
+  print(year)
+  w<-c(Year=year,Local=localw, Average=averagecl, Global=global)
