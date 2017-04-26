@@ -23,7 +23,7 @@ source("./scripts/functions.R")
   #comp.distribution(wiot[1])
 
 #####
-# Networks of flows
+# Network of flows
 #####
   n.flows.files<-list.files(path="../outputs/networks/flows", full.names=TRUE)
   
@@ -59,9 +59,31 @@ source("./scripts/functions.R")
   y.s<-strength(y$Network, mode = "in")
   y.s<-as.data.frame(y.s)
 
-    
+  # CLustering
+  clustering.flow<-lapply(n.flows.files,function(x){
+    y<-open.rdata(x)
+    year<-y$Year
+    net<-y$Network
+    net<-as.undirected(net, mode="collapse")
+    localw<-transitivity(net,  vids ="FRA20" ,type="weighted")
+    averagecl<-transitivity(net,type="average")
+    global<-transitivity(net, type="global")
+    print(year)
+    w<-c(Year=year,Local=localw, Average=averagecl, Global=global)
+  })
+  clustering.flow.2<-as.data.frame(clustering.flow)
+  clustering.flow.2<-t(clustering.flow.2)
+  clustering.flow.2<-as.data.frame(clustering.flow.2)
+  #rownames(clustering.flow.2)<-clustering.flow.2$Year
+  clustering.flow.2<- melt(clustering.flow.2, id="Year")
+  write.csv(clustering.flow.2, "../outputs/clustering.flow.csv")
+  
+  clustering.flow.graph<-ggplot(data=clustering.flow.2, aes(x=Year, y=value, group=variable, color=variable)) + geom_line() + geom_point()
+  clustering.flow.graph
+  
+  
 #####
-# Networks of technical coefficients
+# Network of technical coefficients
 #####
   n.techcoef.files<-list.files(path="../outputs/networks/techcoef", full.names=TRUE)
   
@@ -118,15 +140,25 @@ source("./scripts/functions.R")
          scale = 1, width = 16, height = 5, units = "cm",
          dpi = 300, limitsize = TRUE) 
   
+  # See if AUS46 belong to the connected component in 2000
+    # net.2000.ci<-open.rdata(n.techcoef.files[1])
+    # net.2000.ci<-net.2000.ci$Network
+    # subcomponent(net.2000.ci,"AUS49", mode ="all")
+
+#####
+# Networks of value added
+#####    
+
+  n.valueadded.files<-list.files(path="../outputs/networks/valueadded", full.names=TRUE)
   
-# Leontief Matrix
-  
-  L<-leontief.matrix(wiot[12])
-  
-  df<-lapply(wiot.files[1], function(x){
+  # Strength distribution
+  lapply(n.valueadded.files,function(x){
     y<-open.rdata(x)
+    networks.strenght(y, binwidth=.1, thousands = FALSE)
   })
-  df<-as.data.frame(df)
   
+  # See if AUS46 belong to the connected component in 2000
+    # net.2000.va<-open.rdata(n.valueadded.files[1])
+    # net.2000.va<-net.2000.va$Network
+    # subcomponent(net.2000.va,"AUS47", mode ="all")
   
-  test.valuedaddedmatrix<-valueadded.matrix(df)

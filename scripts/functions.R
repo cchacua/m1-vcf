@@ -131,9 +131,10 @@ valueadded.matrix<-function(df){
   va.matrix<-diag(va.df$valuead)
   
   valcontrib<-va.matrix %*% cin
+  valcontrib<-as.data.frame(valcontrib)
+  colnames(valcontrib)<-cit.names
+  valcontrib
 }
-
-
 
 # Create networks
 networks<-function(df, mode="flows", sector="FRA20", subcomponent=TRUE){
@@ -312,3 +313,31 @@ networks.strenght<-function(datalist, binwidth=20, mode="ind", thousands=TRUE){
     y.s$country<-rownames(y.s)
     print(y.s[y.s$y.s>=1,])
   }
+  
+# Graph a measure for all years, taking a network file
+  graphmeasure.years<-function(list, measure="transitivity.w"){
+    sizes<-lapply(list,function(x){
+      y<-open.rdata(x)
+      year<-y$Year
+      net<-y$Network
+      
+      if(measure=="transitivity.w"){
+        Measure.out<-transitivity(net, type="weighted")
+        legend<-"Average weighted clustering coefficient"}
+      else if(measure=="transitivity.g"){
+        Measure.out<-transitivity(net, type="global")
+        legend<-"Global clustering coefficient"}
+      w<-c(Year=year,Measure=Measure.out, Legend=legend)
+    })
+    sizes<-t(as.data.frame(sizes))
+    sizes<-as.data.frame(sizes)
+    rownames(sizes)<-sizes$Year
+    Legend.t<-sizes$Legend[1]
+    measure.plot<-ggplot(sizes, aes(Year, Measure, colour="#7CAE00")) + geom_line(size=1)+ geom_point(size=2)+xlab("Year") + ylab(Legend.t)+ theme(legend.position="none")
+    ggsave(paste0("../outputs/",measure, ".png", sep=""), plot = measure.plot, device = "png",
+           scale = 1, width = 16, height = 5, units = "cm",
+           dpi = 300, limitsize = TRUE) 
+    
+  }
+  
+  

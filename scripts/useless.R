@@ -226,3 +226,21 @@ y.s<-as.data.frame(y.s)
 y<-open.rdata(n.techcoef.files[10])
 y.s<-strength(y$Network, mode = "in")
 y.s<-as.data.frame(y.s)
+
+#########################################
+
+# Leontief Matrix
+
+L<-leontief.matrix(wiot[12])
+
+df<-lapply(wiot.files[1], function(x){
+  y<-open.rdata(x)
+})
+df<-as.data.frame(df)
+
+
+test.valuedaddedmatrix<-valueadded.matrix(df)
+test.valuedaddedmatrix<-as.data.frame(test.valuedaddedmatrix)
+
+
+
