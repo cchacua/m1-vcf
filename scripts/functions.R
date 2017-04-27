@@ -374,4 +374,17 @@ networks.strenght<-function(datalist, binwidth=20, mode="ind", thousands=TRUE){
            scale = 1, width = 10, height = 5, units = "cm",
            dpi = 300, limitsize = TRUE) 
   }    
-  
+
+# Communities
+  comm.newman<-function(list, typenet){
+    communities.list<-lapply(list,function(x){
+      y<-open.rdata(x)
+      year<-y$Year
+      print(year)
+      net<-y$Network
+      community<-cluster_edge_betweenness(net, weights = E(net)$weight)
+      save(x, file=paste0("../outputs/communities/newman/",typenet,"_",year,".RData"))
+      community
+    })
+    communities.list
+  } 

@@ -93,10 +93,53 @@ source("./scripts/functions.R")
          scale = 1, width = 10, height = 5, units = "cm",
          dpi = 300, limitsize = TRUE) 
   
+  # Communities
+  lapply(n.flows.files[1],function(x){
+    y<-open.rdata(n.flows.files[1])
+    year<-y$Year
+    print(year)
+    net<-y$Network
+    community<-cluster_edge_betweenness(net)
+    save(x, file=paste0("../outputs/communities/newman/flows_",year,".RData"))
+  })
+  
 #####
 # Network of technical coefficients
 #####
   n.techcoef.files<-list.files(path="../outputs/networks/techcoef", full.names=TRUE)
+  
+  # Communities
+    lapply(n.techcoef.files,function(x, mode="techcoef"){
+    y<-open.rdata(x)
+    year<-y$Year
+    print(year)
+    y<-y$Network
+    
+    y<-simplify(y, remove.multiple = FALSE, remove.loops = TRUE)
+    communityinfo<-cluster_infomap(y)
+    save(communityinfo, file=paste0("../outputs/communities/cluster_infomap/", year,mode, ".RData"))
+    
+    
+    y<-as.undirected(y, mode="collapse")
+    community1<-cluster_fast_greedy(y)
+    pdf(paste0("../outputs/communities/cluster_fast_greedy/", year,mode, ".pdf"), width=14, height=100)
+    # Do some plotting
+    plot_dendrogram(community1, cex = 0.2)
+    # Close the PDF file's associated graphics device (necessary to finalize the output)
+    dev.off()
+    save(community1, file=paste0("../outputs/communities/cluster_fast_greedy/", year,mode, ".RData"))
+    
+    community2<-multilevel.community(y)
+    pdf(paste0("../outputs/communities/multilevel.community/", year,mode, ".pdf"), width=14, height=100)
+    # Do some plotting
+    plot_dendrogram(community2, cex = 0.2)
+    # Close the PDF file's associated graphics device (necessary to finalize the output)
+    dev.off()
+    save(community2, file=paste0("../outputs/communities/multilevel.community/", year,mode, ".RData"))
+    
+  })
+  
+  
   
   # Special Cases
   # Negative value added: 
@@ -172,4 +215,4 @@ source("./scripts/functions.R")
     # net.2000.va<-open.rdata(n.valueadded.files[1])
     # net.2000.va<-net.2000.va$Network
     # subcomponent(net.2000.va,"AUS47", mode ="all")
-  
+  graph.clustering(n.valueadded.files)
