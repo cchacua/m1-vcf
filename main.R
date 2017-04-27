@@ -27,6 +27,33 @@ source("./scripts/functions.R")
 #####
   n.flows.files<-list.files(path="../outputs/networks/flows", full.names=TRUE)
   
+
+  # Communities
+  lapply(n.flows.files,function(x, mode="flows"){
+    y<-open.rdata(x)
+    year<-y$Year
+    print(year)
+    y<-y$Network
+    
+    # y<-simplify(y, remove.multiple = FALSE, remove.loops = TRUE)
+    # communityinfo<-cluster_infomap(y)
+    # save(communityinfo, file=paste0("../outputs/communities/cluster_infomap/", year,mode, ".RData"))
+    # ?membership
+    
+    y<-as.undirected(y, mode="collapse")
+    community1<-cluster_fast_greedy(y)
+    pdf(paste0("../outputs/communities/cluster_fast_greedy/", year,mode, ".pdf"), width=14, height=100)
+    # Do some plotting
+    plot_dendrogram(community1, cex = 0.2)
+    # Close the PDF file's associated graphics device (necessary to finalize the output)
+    dev.off()
+    save(community1, file=paste0("../outputs/communities/cluster_fast_greedy/", year,mode, ".RData"))
+    
+    # community2<-multilevel.community(y)
+    # save(community2, file=paste0("../outputs/communities/multilevel.community/", year,mode, ".RData"))
+    # 
+    })
+
   lapply(n.flows.files,function(x){
     y<-open.rdata(x)
     networks.degree(y, .1)
@@ -115,10 +142,10 @@ source("./scripts/functions.R")
     print(year)
     y<-y$Network
     
-    y<-simplify(y, remove.multiple = FALSE, remove.loops = TRUE)
-    communityinfo<-cluster_infomap(y)
-    save(communityinfo, file=paste0("../outputs/communities/cluster_infomap/", year,mode, ".RData"))
-    
+    # y<-simplify(y, remove.multiple = FALSE, remove.loops = TRUE)
+    # communityinfo<-cluster_infomap(y)
+    # save(communityinfo, file=paste0("../outputs/communities/cluster_infomap/", year,mode, ".RData"))
+    # ?membership
     
     y<-as.undirected(y, mode="collapse")
     community1<-cluster_fast_greedy(y)
@@ -128,15 +155,10 @@ source("./scripts/functions.R")
     # Close the PDF file's associated graphics device (necessary to finalize the output)
     dev.off()
     save(community1, file=paste0("../outputs/communities/cluster_fast_greedy/", year,mode, ".RData"))
-    
-    community2<-multilevel.community(y)
-    pdf(paste0("../outputs/communities/multilevel.community/", year,mode, ".pdf"), width=14, height=100)
-    # Do some plotting
-    plot_dendrogram(community2, cex = 0.2)
-    # Close the PDF file's associated graphics device (necessary to finalize the output)
-    dev.off()
-    save(community2, file=paste0("../outputs/communities/multilevel.community/", year,mode, ".RData"))
-    
+     
+    # community2<-multilevel.community(y)
+    # save(community2, file=paste0("../outputs/communities/multilevel.community/", year,mode, ".RData"))
+    # 
   })
   
   
@@ -204,6 +226,33 @@ source("./scripts/functions.R")
 #####    
 
   n.valueadded.files<-list.files(path="../outputs/networks/valueadded", full.names=TRUE)
+  
+  lapply(n.valueadded.files,function(x, mode="valueadded"){
+    y<-open.rdata(x)
+    year<-y$Year
+    print(year)
+    y<-y$Network
+    
+    # y<-simplify(y, remove.multiple = FALSE, remove.loops = TRUE)
+    # communityinfo<-cluster_infomap(y)
+    # save(communityinfo, file=paste0("../outputs/communities/cluster_infomap/", year,mode, ".RData"))
+    # ?membership
+    
+    y<-as.undirected(y, mode="collapse")
+    y.weight<-E(y)$weight
+    y.weight<-ifelse(y.weight<0,0, y.weight)
+    community1<-cluster_fast_greedy(y,  weights = y.weight)
+    pdf(paste0("../outputs/communities/cluster_fast_greedy/", year,mode, ".pdf"), width=14, height=100)
+    # Do some plotting
+    plot_dendrogram(community1, cex = 0.2)
+    # Close the PDF file's associated graphics device (necessary to finalize the output)
+    dev.off()
+    save(community1, file=paste0("../outputs/communities/cluster_fast_greedy/", year,mode, ".RData"))
+    
+    # community2<-multilevel.community(y)
+    # save(community2, file=paste0("../outputs/communities/multilevel.community/", year,mode, ".RData"))
+    # 
+  })
   
   # Strength distribution
   lapply(n.valueadded.files,function(x){
