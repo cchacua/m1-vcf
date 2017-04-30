@@ -19,6 +19,60 @@ prod.fr20<-function(df){
   value<-wiot.df[2472, c("FRA20", "Year")]
 }
 
+# Extract production, intermediary consumptions and value added of each year for the transportation sector
+basics.fr20<-function(df){
+  y<-as.data.frame(df)
+  #y$FRA20<-ifelse(paste(y$Country, y$RNr, sep="") %in% c("LUX32", "LUX35", "MLT4", "LVA33"), NA, y$FRA20)
+  #y[paste(y$Country, y$RNr, sep="") %in% c("LUX32", "LUX35", "MLT4", "LVA33"), c("IndustryCode","IndustryDescription","Year", "FRA20")]
+  prod<-y[c(2472, 2465, 2470 ), c("IndustryCode","IndustryDescription","Year", "FRA20")]
+  prod.names<-colnames(prod)
+  prod.names[4]<-prod$Year[1]
+  colnames(prod)<-prod.names
+  prod<-prod[,c(-1,-3)]
+  prod[3,2]<-prod[2,2]/prod[3,2]
+  prod[3,1]<-"Integration rate"
+  prod
+}
+
+# Ranking of CI
+rankingci<-function(df){
+  y<-as.data.frame(df)
+  
+  #y$FRA20<-ifelse(paste(y$Country, y$RNr, sep="") %in% c("LUX32", "LUX35", "MLT4", "LVA33"), NA, y$FRA20)
+  #y[paste(y$Country, y$RNr, sep="") %in% c("LUX32", "LUX35", "MLT4", "LVA33"), c("IndustryCode","IndustryDescription","Year", "FRA20")]
+  prod<-y[c(2465),6:2469]
+  prod<-t(prod)
+  prod<-as.data.frame(prod)
+  colnames(prod)<-"IC"
+  prod$code<-rownames(prod)
+  prod<-prod[order(prod$IC, decreasing = TRUE),]
+  rownames(prod)<-1:nrow(prod)
+  prod2<-prod[c(1:10),]
+  prod<-rbind(prod2, prod[prod$code=="FRA20",])
+  prod$Number<-rownames(prod)
+  prod[,c(3,2,1)]
+}
+
+# Ranking of Integration rate
+rankingint<-function(df){
+  y<-as.data.frame(df)
+  
+  #y$FRA20<-ifelse(paste(y$Country, y$RNr, sep="") %in% c("LUX32", "LUX35", "MLT4", "LVA33"), NA, y$FRA20)
+  #y[paste(y$Country, y$RNr, sep="") %in% c("LUX32", "LUX35", "MLT4", "LVA33"), c("IndustryCode","IndustryDescription","Year", "FRA20")]
+  prod<-y[c(2465,2470),6:2469]
+  prod<-t(prod)
+  prod<-as.data.frame(prod)
+  prod$Integration<-prod[,1]/prod[,2]
+  prod$code<-rownames(prod)
+  
+  prod<-prod[order(prod$Integration, decreasing = TRUE),]
+  rownames(prod)<-1:nrow(prod)
+  prod2<-prod[c(1:10),]
+  prod<-rbind(prod2, prod[prod$code=="FRA20",])
+  prod$Number<-rownames(prod)
+  prod[,c("Number", "code", "Integration")]
+}
+
 # Capitalize first letter
 firstup <- function(x) {
   substr(x, 1, 1) <- toupper(substr(x, 1, 1))
@@ -245,9 +299,9 @@ networks.degree<-function(datalist, binwidth=20, mode="ind"){
            dpi = 300, limitsize = TRUE)
     }
   else if(mode=="ind"){
-    p.total<-ggplot(d.total, aes(x=Degree)) + geom_histogram(fill="#00B0F6", binwidth=binwidth) + xlab("")+ ylab(NULL)+ggtitle("Total")+ geom_point(aes(x=d.total["FRA20","Degree"], y=2, size = 1, colour = "#FEFEFE", shape =8))+ scale_shape_identity()+ theme(legend.position="none")
-    p.in<-ggplot(d.in, aes(x=Degree)) + geom_histogram(fill="#00B0F6", binwidth=binwidth) + xlab("")+ ylab(paste0("Frequency - ", year))+ggtitle("In")+ geom_point(aes(x=d.in["FRA20","Degree"], y=2, size = 1, colour = "#FEFEFE", shape =8))+ scale_shape_identity()+ theme(legend.position="none")
-    p.out<-ggplot(d.out, aes(x=Degree)) + geom_histogram(fill="#00B0F6", binwidth=binwidth) + xlab("Degree")+ ylab(NULL)+ggtitle("Out")+ geom_point(aes(x=d.out["FRA20","Degree"], y=2, size = 1, colour = "#FEFEFE", shape =8))+ scale_shape_identity()+ theme(legend.position="none")
+    p.total<-ggplot(d.total, aes(x=Degree)) + geom_histogram(fill="#00B0F6", binwidth=binwidth) + xlab("")+ ylab(NULL)+ggtitle("Total")+ geom_point(aes(x=d.total["FRA20","Degree"], y=2, size = 1, colour = "#FEFEFE", shape =8))+ scale_shape_identity()+ theme(legend.position="none")+xlim(0, 4.9)+ylim(0, 2000)
+    p.in<-ggplot(d.in, aes(x=Degree)) + geom_histogram(fill="#00B0F6", binwidth=binwidth) + xlab("")+ ylab(paste0("Frequency - ", year))+ggtitle("In")+ geom_point(aes(x=d.in["FRA20","Degree"], y=2, size = 1, colour = "#FEFEFE", shape =8))+ scale_shape_identity()+ theme(legend.position="none")+ xlim(0, 2.4)+ylim(0, 2000)
+    p.out<-ggplot(d.out, aes(x=Degree)) + geom_histogram(fill="#00B0F6", binwidth=binwidth) + xlab("Degree")+ ylab(NULL)+ggtitle("Out")+ geom_point(aes(x=d.out["FRA20","Degree"], y=2, size = 1, colour = "#FEFEFE", shape =8))+ scale_shape_identity()+ theme(legend.position="none")+ xlim(0, 2.4)+ylim(0, 2000)
     
     plot<-grid.arrange(p.in, p.out, p.total, ncol=3)
     
@@ -259,23 +313,30 @@ networks.degree<-function(datalist, binwidth=20, mode="ind"){
 }
 
 # Strength as df
-strength.as.df<-function(network, mode, thousands=TRUE){
+strength.as.df<-function(network, mode, thousands="1"){
   d<-strength(network, mode = mode)
   d<-as.data.frame(d)
   d$type<-firstup(mode)
   colnames(d)<-c("Strength","Type" )
-  if(thousands==TRUE){
+  if(thousands=="1"){
     d$Strength<-d$Strength/1000
+    d
+  }
+  else if(thousands=="2"){
+    d$Strength<-d$Strength/100000
+    print(max(d$Strength))
+    print(d["FRA20","Strength"])
     d
   }
   else{d}
 }
 
 # Strenght distribution
-networks.strenght<-function(datalist, binwidth=20, mode="ind", thousands=TRUE){
+networks.strenght<-function(datalist, binwidth=20, mode="ind", thousands="1", xlims=c("total", "in", "out"), ylims=c("total", "in", "out")){
   # Modes: grid and ind
   # Types: d, cd, s, cs
   year<-datalist$Year
+  print(year)
   cit.net<-datalist$Network
   d.total<-strength.as.df(cit.net, "total", thousands)
   d.in<-strength.as.df(cit.net, "in", thousands)
@@ -291,9 +352,9 @@ networks.strenght<-function(datalist, binwidth=20, mode="ind", thousands=TRUE){
            dpi = 300, limitsize = TRUE)
   }
   else if(mode=="ind"){
-    p.total<-ggplot(d.total, aes(x=Strength)) + geom_histogram(fill="#00BA38", binwidth=binwidth) + xlab("")+ ylab(NULL)+ggtitle("Total")+ geom_point(aes(x=d.total["FRA20","Strength"], y=2, size = 1, colour = "#FEFEFE", shape =8))+ scale_shape_identity()+ theme(legend.position="none")
-    p.in<-ggplot(d.in, aes(x=Strength)) + geom_histogram(fill="#00BA38", binwidth=binwidth) + xlab("")+ ylab(paste0("Frequency - ", year))+ggtitle("In")+ geom_point(aes(x=d.in["FRA20","Strength"], y=2, size = 1, colour = "#FEFEFE", shape =8))+ scale_shape_identity()+ theme(legend.position="none")
-    p.out<-ggplot(d.out, aes(x=Strength)) + geom_histogram(fill="#00BA38", binwidth=binwidth) + xlab("Strength")+ ylab(NULL)+ggtitle("Out")+ geom_point(aes(x=d.out["FRA20","Strength"], y=2, size = 1, colour = "#FEFEFE", shape =8))+ scale_shape_identity()+ theme(legend.position="none")
+    p.total<-ggplot(d.total, aes(x=Strength)) + geom_histogram(fill="#00BA38", binwidth=binwidth) + xlab("")+ ylab(NULL)+ggtitle("Total")+ geom_point(aes(x=d.total["FRA20","Strength"], y=2, size = 1, colour = "#FEFEFE", shape =8))+ scale_shape_identity()+ theme(legend.position="none")+xlim(0, xlims[1])+ylim(0, ylims[1])
+    p.in<-ggplot(d.in, aes(x=Strength)) + geom_histogram(fill="#00BA38", binwidth=binwidth) + xlab("")+ ylab(paste0("Frequency - ", year))+ggtitle("In")+ geom_point(aes(x=d.in["FRA20","Strength"], y=2, size = 1, colour = "#FEFEFE", shape =8))+ scale_shape_identity()+ theme(legend.position="none")+xlim(0, xlims[2])+ylim(0, ylims[2])
+    p.out<-ggplot(d.out, aes(x=Strength)) + geom_histogram(fill="#00BA38", binwidth=binwidth) + xlab("Strength")+ ylab(NULL)+ggtitle("Out")+ geom_point(aes(x=d.out["FRA20","Strength"], y=2, size = 1, colour = "#FEFEFE", shape =8))+ scale_shape_identity()+ theme(legend.position="none")+xlim(0, xlims[3])+ylim(0, ylims[3])
     
     plot<-grid.arrange(p.in, p.out, p.total, ncol=3)
     

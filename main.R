@@ -61,8 +61,25 @@ source("./scripts/functions.R")
   
   lapply(n.flows.files,function(x){
     y<-open.rdata(x)
-    networks.strenght(y, 50)
+    networks.strenght(y,  binwidth=2, thousands="2", xlims=c(30,20,20), ylims=c(150,150,150))
   })
+  
+  df.strenght<-function(datalist, thousands="1", mode="total"){
+    # Modes: grid and ind
+    # Types: d, cd, s, cs
+    year<-datalist$Year
+    print(year)
+    cit.net<-datalist$Network
+    if(mode=="total"){d.total<-strength.as.df(cit.net, "total", thousands)}
+    else if (mode=="in"){d.in<-strength.as.df(cit.net, "in", thousands)}
+    else if(mode=="out"){d.out<-strength.as.df(cit.net, "out", thousands)}
+    else{print("No mode")}
+  }
+  total<-lapply(n.flows.files,function(x){
+    y<-open.rdata(x)
+    df.strenght(y, thousands="2")
+  })
+  View(total[1])
   
   
   # y<-open.rdata(n.flows.files[1])
@@ -221,6 +238,7 @@ source("./scripts/functions.R")
     # net.2000.ci<-net.2000.ci$Network
     # subcomponent(net.2000.ci,"AUS49", mode ="all")
   graph.clustering(n.techcoef.files)
+
 #####
 # Networks of value added
 #####    
@@ -265,3 +283,39 @@ source("./scripts/functions.R")
     # net.2000.va<-net.2000.va$Network
     # subcomponent(net.2000.va,"AUS47", mode ="all")
   graph.clustering(n.valueadded.files)
+  
+  
+#####
+# Descriptive statistics
+#####
+  wiot.files<-list.files(path="../data/wiot", full.names=TRUE)
+  
+  descriptives<-lapply(wiot.files[c(1,11,15)],function(x){
+    y<-open.rdata(x)
+    basics.fr20(y)
+  })
+  descriptives<-as.data.frame(descriptives)
+  descriptives<-descriptives[,c(-3,-5)]
+  xtable(descriptives)
+  
+  rankingci.df<-lapply(wiot.files[c(1,11,15)],function(x){
+    y<-open.rdata(x)
+    rankingci(y)
+  })
+  rankingci.df<-as.data.frame(rankingci.df)
+  rownames(rankingci.df)<-1:nrow(rankingci.df)
+  rankingci.xtable<-xtable(rankingci.df)
+  print(rankingci.xtable, include.rownames = FALSE, booktabs = TRUE)
+  
+  
+  
+  rankingint.df<-lapply(wiot.files[c(1,11,15)],function(x){
+    y<-open.rdata(x)
+    rankingint(y)
+  })
+  rankingint.df<-as.data.frame(rankingint.df)
+  #rownames(rankingint.df)<-1:nrow(rankingint.df)
+  rankingint.xtable<-xtable(rankingint.df)
+  print(rankingint.xtable, include.rownames = FALSE, booktabs = TRUE)
+  
+  
