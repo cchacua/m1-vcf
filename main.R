@@ -131,7 +131,8 @@ source("./scripts/functions.R")
   clustering.flow.2<- melt(clustering.flow.2, id="Year")
   write.csv(clustering.flow.2, "../outputs/clustering.flow.csv")
   
-  clustering.flow.graph<-ggplot(data=clustering.flow.2, aes(x=Year, y=value, group=variable, color=variable)) + geom_line() + geom_point()+ylab("Clustering coefficient")+ guides(fill=guide_legend(title=NULL))
+  clustering.flow.2<-read.csv("../outputs/clustering/clustering.flow.csv")
+  clustering.flow.graph<-ggplot(data=clustering.flow.2, aes(x=Year, y=value, group=variable, color=variable)) + geom_line() + geom_point()+ylab("Clustering coefficient")+ guides(fill=guide_legend(title=NULL))+scale_x_continuous(minor_breaks = seq(2000 , 2014, 1), breaks = seq(2000 , 2014, 5))
   
   ggsave(paste0("../outputs/","clustering.flow", ".png", sep=""), plot = clustering.flow.graph, device = "png",
          scale = 1, width = 10, height = 5, units = "cm",
@@ -145,6 +146,31 @@ source("./scripts/functions.R")
     net<-y$Network
     community<-cluster_edge_betweenness(net)
     save(x, file=paste0("../outputs/communities/newman/flows_",year,".RData"))
+  })
+  
+  com.flows.files<-list.files(path="../outputs/communities/cluster_fast_greedy/flows", full.names=TRUE)  
+  lapply(com.flows.files,function(x){
+    print(x)
+    name<-substr(x, nchar(x)-21+1, nchar(x)-6)
+    print(name)
+    y<-open.rdata(x)
+    w<-membership(y)
+    w<-as.list(w)
+    w<-as.data.frame(w)
+    w<-t(w)
+    w<-as.data.frame(w)
+    w$id<-rownames(w)
+    w$Country<-substr(w$id, 1, 3)
+    w$Sector<-substr(w$id, 4, nchar(w$id))
+    w$Sector<-ifelse(nchar(w$Sector)==1, paste0("0",w$Sector,sep=""),w$Sector)
+    w$V1<-ifelse(nchar(w$V1)==1, paste0("0",w$V1,sep=""),w$V1)
+    w$V1<-as.factor(w$V1)
+    w<-w[order(w$Country, decreasing = TRUE),]
+    w$Community<-w$V1
+    plot<-ggplot(w, aes(Sector, Country)) + geom_tile(aes(fill = Community), colour = "white") + scale_fill_manual(values= rainbow(length(unique(w$V1))))
+    ggsave(paste0("../outputs/communities/cluster_fast_greedy/",name, ".png", sep=""), plot = plot, device = "png",
+           scale = 1.9, width = 16, height = 8, units = "cm",
+           dpi = 300, limitsize = TRUE) 
   })
   
 #####
@@ -178,6 +204,30 @@ source("./scripts/functions.R")
     # 
   })
   
+  com.techcoef.files<-list.files(path="../outputs/communities/cluster_fast_greedy/techcoef", full.names=TRUE)  
+  lapply(com.techcoef.files,function(x){
+    print(x)
+    name<-substr(x, nchar(x)-18+1, nchar(x)-5)
+    print(name)
+    y<-open.rdata(x)
+    w<-membership(y)
+    w<-as.list(w)
+    w<-as.data.frame(w)
+    w<-t(w)
+    w<-as.data.frame(w)
+    w$id<-rownames(w)
+    w$Country<-substr(w$id, 1, 3)
+    w$Sector<-substr(w$id, 4, nchar(w$id))
+    w$Sector<-ifelse(nchar(w$Sector)==1, paste0("0",w$Sector,sep=""),w$Sector)
+    w$V1<-ifelse(nchar(w$V1)==1, paste0("0",w$V1,sep=""),w$V1)
+    w$V1<-as.factor(w$V1)
+    w<-w[order(w$Country, decreasing = TRUE),]
+    w$Community<-w$V1
+    plot<-ggplot(w, aes(Sector, Country)) + geom_tile(aes(fill = Community), colour = "white") + scale_fill_manual(values= rainbow(length(unique(w$V1))))
+    ggsave(paste0("../outputs/communities/cluster_fast_greedy/",name, ".png", sep=""), plot = plot, device = "png",
+           scale = 1.9, width = 16, height = 8, units = "cm",
+           dpi = 300, limitsize = TRUE) 
+  })
   
   
   # Special Cases
@@ -207,8 +257,9 @@ source("./scripts/functions.R")
   # Strength distribution
   lapply(n.techcoef.files,function(x){
     y<-open.rdata(x)
-    networks.strenght(y, binwidth=.1, thousands = FALSE)
+    networks.strenght(y,  binwidth=.1, thousands="0", xlims=c(15,1,12), ylims=c(600,600,600))
   })
+  
   
   # Network size
   sizes<-lapply(n.techcoef.files,function(x){
@@ -223,13 +274,18 @@ source("./scripts/functions.R")
   sizes<-as.data.frame(sizes)
   rownames(sizes)<-sizes$Year
   
-  nodesizes.plot<-ggplot(sizes, aes(Year, Nodes, colour="#7CAE00")) + geom_line(size=1)+ geom_point(size=2)+xlab("Year") + ylab("Number of nodes")+ theme(legend.position="none")
+  nodesizes.plot<-ggplot(sizes, aes(Year, Nodes, colour="#7CAE00")) + geom_line(size=1)+ geom_point(size=2)+xlab("Year") + ylab("Number of nodes")+ theme(legend.position="none")+scale_x_continuous(minor_breaks = seq(2000 , 2014, 1), breaks = seq(2000 , 2014, 5))
   ggsave(paste0("../outputs/","node_sizes", ".png", sep=""), plot = nodesizes.plot, device = "png",
-         scale = 1, width = 16, height = 5, units = "cm",
+         scale = 1, width = 8, height = 5, units = "cm",
          dpi = 300, limitsize = TRUE) 
   
-  edgesizes.plot<-ggplot(sizes, aes(Year, Edges, colour="#7CAE00")) + geom_line(size=1)+ geom_point(size=2)+xlab("Year") + ylab("Number of edges")+ theme(legend.position="none")
+  edgesizes.plot<-ggplot(sizes, aes(Year, Edges, colour="#7CAE00")) + geom_line(size=1)+ geom_point(size=2)+xlab("Year") + ylab("Number of edges")+ theme(legend.position="none")+scale_x_continuous(minor_breaks = seq(2000 , 2014, 1), breaks = seq(2000 , 2014, 5))
   ggsave(paste0("../outputs/","edge_sizes", ".png", sep=""), plot = edgesizes.plot, device = "png",
+         scale = 1, width = 8, height = 5, units = "cm",
+         dpi = 300, limitsize = TRUE) 
+
+  plot.edgenodes<-grid.arrange(nodesizes.plot, edgesizes.plot, ncol=2)
+  ggsave(paste0("../outputs/","edgenode_sizes", ".png", sep=""), plot = plot.edgenodes, device = "png",
          scale = 1, width = 16, height = 5, units = "cm",
          dpi = 300, limitsize = TRUE) 
   
@@ -238,6 +294,11 @@ source("./scripts/functions.R")
     # net.2000.ci<-net.2000.ci$Network
     # subcomponent(net.2000.ci,"AUS49", mode ="all")
   graph.clustering(n.techcoef.files)
+  clustering.graph<-ggplot(data=read.csv("../outputs/clustering/No/tecchnical coefficients.csv"), aes(x=Year, y=value, group=variable, color=variable)) + geom_line() + geom_point()+ylab("Clustering coefficient")+ guides(fill=guide_legend(title=NULL))+scale_x_continuous(minor_breaks = seq(2000 , 2014, 1), breaks = seq(2000 , 2014, 5))
+  ggsave(paste0("../outputs/clustering/clustering.","tecchnical coefficients", ".png", sep=""), plot = clustering.graph, device = "png",
+         scale = 1, width = 10, height = 5, units = "cm",
+         dpi = 300, limitsize = TRUE) 
+  
 
 #####
 # Networks of value added
@@ -278,12 +339,20 @@ source("./scripts/functions.R")
     networks.strenght(y, binwidth=.1, thousands = FALSE)
   })
   
+  lapply(n.valueadded.files,function(x){
+    y<-open.rdata(x)
+    networks.strenght(y,  binwidth=.1, thousands="0", xlims=c(40,1.2,40), ylims=c(300,1500,300))
+  })
+  
   # See if AUS46 belong to the connected component in 2000
     # net.2000.va<-open.rdata(n.valueadded.files[1])
     # net.2000.va<-net.2000.va$Network
     # subcomponent(net.2000.va,"AUS47", mode ="all")
   graph.clustering(n.valueadded.files)
-  
+  clustering.graph<-ggplot(data=read.csv("../outputs/clustering/No/value added.csv"), aes(x=Year, y=value, group=variable, color=variable)) + geom_line() + geom_point()+ylab("Clustering coefficient")+ guides(fill=guide_legend(title=NULL))+scale_x_continuous(minor_breaks = seq(2000 , 2014, 1), breaks = seq(2000 , 2014, 5))
+  ggsave(paste0("../outputs/clustering/clustering.","value added", ".png", sep=""), plot = clustering.graph, device = "png",
+         scale = 1, width = 10, height = 5, units = "cm",
+         dpi = 300, limitsize = TRUE) 
   
 #####
 # Descriptive statistics

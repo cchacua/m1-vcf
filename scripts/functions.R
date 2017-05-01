@@ -427,11 +427,11 @@ networks.strenght<-function(datalist, binwidth=20, mode="ind", thousands="1", xl
     clustering<-as.data.frame(clustering)
     #rownames(clustering)<-clustering$Year
     clustering<- melt(clustering, id="Year")
-    write.csv(clustering, paste0("../outputs/clustering_",name,".csv", sep=""))
+    write.csv(clustering, paste0("../outputs/clustering/clustering_",name,".csv", sep=""))
     
-    clustering.graph<-ggplot(data=clustering, aes(x=Year, y=value, group=variable, color=variable)) + geom_line() + geom_point()+ylab("Clustering coefficient")+ guides(fill=guide_legend(title=NULL))
+    clustering.graph<-ggplot(data=clustering, aes(x=Year, y=value, group=variable, color=variable)) + geom_line() + geom_point()+ylab("Clustering coefficient")+ guides(fill=guide_legend(title=NULL))+scale_x_continuous(minor_breaks = seq(2000 , 2014, 1), breaks = seq(2000 , 2014, 5))
     
-    ggsave(paste0("../outputs/",name, ".png", sep=""), plot = clustering.graph, device = "png",
+    ggsave(paste0("../outputs/clustering/clustering.",name, ".png", sep=""), plot = clustering.graph, device = "png",
            scale = 1, width = 10, height = 5, units = "cm",
            dpi = 300, limitsize = TRUE) 
   }    
