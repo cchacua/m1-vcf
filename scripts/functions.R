@@ -449,3 +449,24 @@ networks.strenght<-function(datalist, binwidth=20, mode="ind", thousands="1", xl
     })
     communities.list
   } 
+  
+# Graph assortativity
+  graph.assortativity<-function(link, mode){
+
+  net.files<-files<-list.files(path=link, full.names=TRUE)  
+  assortativity<-lapply(net.files,function(x){
+    y<-open.rdata(x)
+    w<-assortativity_degree(y$Network, directed = TRUE)
+    c(w,y$Year)
+  })
+  assortativity<-as.data.frame(assortativity)
+  assortativity<-t(assortativity)
+  assortativity<-as.data.frame(assortativity)
+  colnames(assortativity)<-c("Value", "Year")
+  rownames(assortativity)<-assortativity$Year
+  assortativity.plot<-ggplot(assortativity, aes(Year, Value, colour="#7CAE00")) + geom_line(size=1)+ geom_point(size=2)+xlab("Year") + ylab("Assortativity degree")+ theme(legend.position="none")+scale_x_continuous(minor_breaks = seq(2000 , 2014, 1), breaks = seq(2000 , 2014, 5))
+  ggsave(paste0("../outputs/assortativity",mode ,".png", sep=""), plot = assortativity.plot, device = "png",
+         scale = 1, width = 8, height = 5, units = "cm",
+         dpi = 300, limitsize = TRUE) 
+  
+  }

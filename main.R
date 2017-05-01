@@ -151,7 +151,7 @@ source("./scripts/functions.R")
   com.flows.files<-list.files(path="../outputs/communities/cluster_fast_greedy/flows", full.names=TRUE)  
   lapply(com.flows.files,function(x){
     print(x)
-    name<-substr(x, nchar(x)-21+1, nchar(x)-6)
+    name<-substr(x, nchar(x)-15+1, nchar(x)-6)
     print(name)
     y<-open.rdata(x)
     w<-membership(y)
@@ -172,6 +172,8 @@ source("./scripts/functions.R")
            scale = 1.9, width = 16, height = 8, units = "cm",
            dpi = 300, limitsize = TRUE) 
   })
+  
+  graph.assortativity("../outputs/networks/flows","flows")
   
 #####
 # Network of technical coefficients
@@ -299,7 +301,23 @@ source("./scripts/functions.R")
          scale = 1, width = 10, height = 5, units = "cm",
          dpi = 300, limitsize = TRUE) 
   
-
+  net.techcoef.files<-files<-list.files(path="../outputs/networks/techcoef", full.names=TRUE)  
+  assortativity<-lapply(net.techcoef.files,function(x){
+    y<-open.rdata(x)
+    w<-assortativity_degree(y$Network, directed = TRUE)
+    c(w,y$Year)
+  })
+  assortativity<-as.data.frame(assortativity)
+  assortativity<-t(assortativity)
+  assortativity<-as.data.frame(assortativity)
+  colnames(assortativity)<-c("Value", "Year")
+  rownames(assortativity)<-assortativity$Year
+  assortativity.plot<-ggplot(assortativity, aes(Year, Value, colour="#7CAE00")) + geom_line(size=1)+ geom_point(size=2)+xlab("Year") + ylab("Assortativity degree")+ theme(legend.position="none")+scale_x_continuous(minor_breaks = seq(2000 , 2014, 1), breaks = seq(2000 , 2014, 5))
+  ggsave(paste0("../outputs/","assortativity.techcoef", ".png", sep=""), plot = assortativity.plot, device = "png",
+         scale = 1, width = 8, height = 5, units = "cm",
+         dpi = 300, limitsize = TRUE) 
+  
+  graph.assortativity("../outputs/networks/techcoef","techcoeff")
 #####
 # Networks of value added
 #####    
@@ -354,6 +372,33 @@ source("./scripts/functions.R")
          scale = 1, width = 10, height = 5, units = "cm",
          dpi = 300, limitsize = TRUE) 
   
+  
+  com.valueadded.files<-list.files(path="../outputs/communities/cluster_fast_greedy/valueadded", full.names=TRUE)  
+  lapply( com.valueadded.files,function(x){
+    print(x)
+    name<-substr(x, nchar(x)-20+1, nchar(x)-6)
+    print(name)
+    y<-open.rdata(x)
+    w<-membership(y)
+    w<-as.list(w)
+    w<-as.data.frame(w)
+    w<-t(w)
+    w<-as.data.frame(w)
+    w$id<-rownames(w)
+    w$Country<-substr(w$id, 1, 3)
+    w$Sector<-substr(w$id, 4, nchar(w$id))
+    w$Sector<-ifelse(nchar(w$Sector)==1, paste0("0",w$Sector,sep=""),w$Sector)
+    w$V1<-ifelse(nchar(w$V1)==1, paste0("0",w$V1,sep=""),w$V1)
+    w$V1<-as.factor(w$V1)
+    w<-w[order(w$Country, decreasing = TRUE),]
+    w$Community<-w$V1
+    plot<-ggplot(w, aes(Sector, Country)) + geom_tile(aes(fill = Community), colour = "white") + scale_fill_manual(values= rainbow(length(unique(w$V1))))
+    ggsave(paste0("../outputs/communities/cluster_fast_greedy/",name, ".png", sep=""), plot = plot, device = "png",
+           scale = 1.9, width = 16, height = 8, units = "cm",
+           dpi = 300, limitsize = TRUE) 
+  })
+  
+  graph.assortativity("../outputs/networks/valueadded","valueadded")
 #####
 # Descriptive statistics
 #####
